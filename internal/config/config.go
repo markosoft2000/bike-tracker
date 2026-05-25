@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
 )
@@ -12,11 +13,45 @@ import (
 type Config struct {
 	Env        string           `yaml:"env" env:"ENV" env-default:"local"`
 	HTTPServer HTTPServerConfig `yaml:"http_server"`
+	Middleware MiddlewareConfig `yaml:"middleware"`
+	Services   ServicesConfig   `yaml:"services"`
 }
 
 type HTTPServerConfig struct {
-	Address string `yaml:"address" env:"HTTP_PORT" env-default:"localhost:8080"`
-	Timeout int    `yaml:"timeout" env-default:"3"`
+	Address            string `yaml:"address" env:"HTTP_PORT" env-default:"localhost:8080"`
+	ServerHeader       string `yaml:"server_header" env:"HTTP_SERVER_HEADER" env-default:"bike-tracker"`
+	DisableKeepalive   bool   `yaml:"disable_keepalive" env:"HTTP_DISABLE_KEEPALIVE" env-default:"false"`
+	Concurrency        int    `yaml:"concurrency" env:"HTTP_CONCURRENCY" env-default:"262144"`                // Maximum concurrent connections allocated
+	ReduceMemoryUsage  bool   `yaml:"reduce_memory_usage" env:"HTTP_REDUCE_MEMORY_USAGE" env-default:"false"` // CRITICAL: Leaves buffers in pool. Setting true hurts CPU.
+	DisableDefaultDate bool   `yaml:"disable_default_date" env:"HTTP_DISABLE_DEFAULT_DATE" env-default:"false"`
+
+	IdleTimeout  time.Duration `yaml:"idle_timeout" env:"HTTP_IDLE_TIMEOUT" env-default:"10s"`
+	ReadTimeout  time.Duration `yaml:"read_timeout" env:"HTTP_READ_TIMEOUT" env-default:"2s"`
+	WriteTimeout time.Duration `yaml:"write_timeout" env:"HTTP_WRITE_TIMEOUT" env-default:"2s"`
+}
+
+type MiddlewareConfig struct {
+	RateLimitMax        int           `yaml:"rate_limit_max" env:"RATE_LIMIT_MAX" env-default:"1000"`
+	RateLimitExpiration time.Duration `yaml:"rate_limit_expiration" env:"RATE_LIMIT_EXPIRATION" env-default:"60s"`
+}
+
+type ServicesConfig struct {
+	AuthServiceAddr string    `yaml:"auth_service_addr" env:"AUTH_SERVICE_ADDR" env-default:"localhost:50051"`
+	SLO             SLOConfig `yaml:"slo"`
+}
+
+type SLOConfig struct {
+	Auth SLOConfigAuth `yaml:"auth"`
+}
+
+type SLOConfigAuth struct {
+	UserRegisterTimeout time.Duration `yaml:"user_register_timeout" env:"USER_REGISTER_TIMEOUT" env-default:"2s"`
+	UserLoginTimeout    time.Duration `yaml:"user_login_timeout" env:"USER_LOGIN_TIMEOUT" env-default:"2s"`
+	UserLogoutTimeout   time.Duration `yaml:"user_logout_timeout" env:"USER_LOGOUT_TIMEOUT" env-default:"2s"`
+	UserIsAdminTimeout  time.Duration `yaml:"user_is_admin_timeout" env:"USER_IS_ADMIN_TIMEOUT" env-default:"2s"`
+	RefreshTokenTimeout time.Duration `yaml:"refresh_token_timeout" env:"REFRESH_TOKEN_TIMEOUT" env-default:"2s"`
+	AppAddTimeout       time.Duration `yaml:"app_add_timeout" env:"APP_ADD_TIMEOUT" env-default:"2s"`
+	AppRemoveTimeout    time.Duration `yaml:"app_remove_timeout" env:"APP_REMOVE_TIMEOUT" env-default:"2s"`
 }
 
 var (

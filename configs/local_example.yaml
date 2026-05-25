@@ -1,5 +1,25 @@
 env: "local"
 http_server:
-  address: "0.0.0.0:8081"
-  timeout: 3
-  keep_alive_timeout: 30s
+  address: "0.0.0.0:8080"
+  server_header: "bike-tracker"
+  disable_keepalive: false
+  concurrency: 262144 #256*1024
+  reduce_memory_usage: false
+  disable_default_date: false
+  idle_timeout: 10s
+  read_timeout: 2s
+  write_timeout: 2s
+middleware:
+  rate_limit_max: 1000
+  rate_limit_expiration: 60s
+services:
+  auth_service_addr: "host.docker.internal:50001"
+  slo:
+    auth:
+        user_register_timeout: 2s
+        user_login_timeout: 2s
+        user_logout_timeout: 2s
+        user_is_admin_timeout: 2s
+        refresh_token_timeout: 2s
+        app_add_timeout: 2s
+        app_remove_timeout: 2s

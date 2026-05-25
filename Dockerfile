@@ -18,7 +18,7 @@ COPY . .
 # BUILD WITH CACHE MOUNTS
 RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg/mod \
-    go build -tags dynamic -o bike-tracker-server ./cmd/bike-tracker/main.go
+    go build -tags dynamic -o gateway-server ./cmd/gateway/main.go
 
 # Stage 2: Final lightweight image
 FROM alpine:3.21
@@ -28,7 +28,7 @@ WORKDIR /app
 RUN apk add --no-cache librdkafka ca-certificates
 
 # Copy binaries from the builder stage
-COPY --from=builder /app/bike-tracker-server .
+COPY --from=builder /app/gateway-server .
 
 # Copy configuration and migration files
 COPY --from=builder /app/configs ./configs
@@ -37,4 +37,4 @@ COPY --from=builder /app/configs ./configs
 EXPOSE 8080
 
 # Command to run
-CMD ["./bike-tracker-server"]
+CMD ["./gateway-server"]

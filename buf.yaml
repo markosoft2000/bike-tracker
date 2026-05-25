@@ -1,0 +1,11 @@
+version: v2
+modules:
+  - path: proto  # This tells buf to look in the 'proto' directory
+deps:
+  - buf.build/bufbuild/protovalidate
+lint:
+  use:
+    - DEFAULT
+  enum_zero_value_suffix: _UNSPECIFIED
+  ignore:
+    - github.com

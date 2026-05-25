@@ -5,12 +5,14 @@ services:
     # deploy:
     #   resources:
     #     limits:
-    #       cpus: '0.50'    # Max 50% of a single CPU core
-    #       memory: 512M   # Hard limit: container will be killed if it exceeds this
+    #       cpus: '2'    # Max 50% of a single CPU core
+    #       memory: 2048M   # Hard limit: container will be killed if it exceeds this
     #     reservations:
-    #       cpus: '0.25'    # Guaranteed 25% of a CPU core
-    #       memory: 256M   # Soft limit: Docker tries to keep usage here
+    #       cpus: '2'    # Guaranteed 25% of a CPU core
+    #       memory: 2048M   # Soft limit: Docker tries to keep usage here
     restart: always
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       CONFIG_PATH: "./configs/local.yaml"
     ports:
