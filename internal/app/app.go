@@ -55,7 +55,7 @@ func New(
 	authHandler := auth_handler.NewAuthHandler(log, cfg)
 
 	// ROUTER
-	router.SetupRoutes(cfg, srv, authHandler)
+	router.SetupRoutes(cfg, log, srv, authHandler)
 
 	return &App{
 		cfg: cfg,
