@@ -15,6 +15,7 @@ type Config struct {
 	HTTPServer HTTPServerConfig `yaml:"http_server"`
 	Middleware MiddlewareConfig `yaml:"middleware"`
 	Services   ServicesConfig   `yaml:"services"`
+	Redis      RedisConfig      `yaml:"redis"`
 }
 
 type HTTPServerConfig struct {
@@ -33,6 +34,8 @@ type HTTPServerConfig struct {
 type MiddlewareConfig struct {
 	RateLimitMax        int           `yaml:"rate_limit_max" env:"RATE_LIMIT_MAX" env-default:"1000"`
 	RateLimitExpiration time.Duration `yaml:"rate_limit_expiration" env:"RATE_LIMIT_EXPIRATION" env-default:"60s"`
+	TokenIssuer         string        `yaml:"token_issuer" env:"TOKEN_ISSUER" env-default:"markosoft2000"`
+	TokenAudience       string        `yaml:"token_audience" env:"TOKEN_AUDIENCE" env-default:"auth-service"`
 }
 
 type ServicesConfig struct {
@@ -52,6 +55,12 @@ type SLOConfigAuth struct {
 	RefreshTokenTimeout time.Duration `yaml:"refresh_token_timeout" env:"REFRESH_TOKEN_TIMEOUT" env-default:"2s"`
 	AppAddTimeout       time.Duration `yaml:"app_add_timeout" env:"APP_ADD_TIMEOUT" env-default:"2s"`
 	AppRemoveTimeout    time.Duration `yaml:"app_remove_timeout" env:"APP_REMOVE_TIMEOUT" env-default:"2s"`
+}
+
+type RedisConfig struct {
+	Host             string        `yaml:"host" env:"REDIS_HOST" env-default:"localhost"`
+	Port             int           `yaml:"port" env:"REDIS_PORT" env-default:"6379"`
+	OperationTimeout time.Duration `yaml:"operation_timeout" env:"OPERATION_TIMEOUT" env-default:"5s"`
 }
 
 var (

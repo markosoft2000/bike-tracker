@@ -2,9 +2,7 @@ package jwt
 
 import (
 	"crypto/ed25519"
-	"errors"
 	"fmt"
-	"log"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
@@ -17,7 +15,10 @@ type CustomTokenClaims struct {
 	AppID  uuid.UUID `json:"app_id"`
 }
 
-func ParseToken(t string) (*jwt.Token, *CustomTokenClaims, error) {
+func ParseToken(
+	t string,
+	getPK func(appID string) ([]byte, error),
+) (*jwt.Token, *CustomTokenClaims, error) {
 	op := "jwt.ParseToken"
 
 	claims := &CustomTokenClaims{}
@@ -31,9 +32,14 @@ func ParseToken(t string) (*jwt.Token, *CustomTokenClaims, error) {
 			return nil, fmt.Errorf("invalid token claims structure context")
 		}
 
-		publicKey, err := getPublicKey(clms.AppID)
+		pk, err := getPK(clms.AppID.String())
 		if err != nil {
-			return nil, fmt.Errorf("%s: failed to get public key %w", op, err)
+			return nil, fmt.Errorf("%s: failed to get app public key %w", op, err)
+		}
+
+		publicKey, err := getPublicKey(pk)
+		if err != nil {
+			return nil, fmt.Errorf("%s: failed to parse public key %w", op, err)
 		}
 
 		return publicKey, nil
@@ -42,26 +48,15 @@ func ParseToken(t string) (*jwt.Token, *CustomTokenClaims, error) {
 	return token, claims, err
 }
 
-func getPublicKey(appID uuid.UUID) (any, error) {
-	// TODO
-	if appID.String() != "019dfd8c-a2ca-7d73-b3c7-80840b1fbed9" {
-		return nil, errors.New("invalid app id")
-	}
-
-	// TODO get public key for a specific app from redis. update auth keys in redis via kafka
-	publicKeyPEM := []byte(`-----BEGIN PUBLIC KEY-----
-M...
------END PUBLIC KEY-----`)
-
-	// Parse once at startup into memory
+func getPublicKey(publicKeyPEM []byte) (any, error) {
 	parsedKey, err := jwt.ParseEdPublicKeyFromPEM(publicKeyPEM)
 	if err != nil {
-		log.Fatalf("failed to compile gateway cryptographic public trust anchor: %v", err) // TODO no fatal
+		return nil, fmt.Errorf("failed to compile gateway cryptographic public trust anchor: %w", err)
 	}
 
 	ed25519Pub, ok := parsedKey.(ed25519.PublicKey)
 	if !ok {
-		log.Fatalf("invalid public key configuration: key is not of type Ed25519") // TODO no fatal
+		return nil, fmt.Errorf("invalid public key configuration: key is not of type Ed25519: %w", err)
 	}
 
 	return ed25519Pub, nil

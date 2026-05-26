@@ -1,6 +1,7 @@
 package router
 
 import (
+	"context"
 	"log/slog"
 
 	"github.com/gofiber/fiber/v3"
@@ -8,13 +9,16 @@ import (
 	"github.com/markosoft2000/bike-tracker/internal/config"
 	auth_handler "github.com/markosoft2000/bike-tracker/internal/gateway/handler/auth"
 	"github.com/markosoft2000/bike-tracker/internal/gateway/middleware"
+	"github.com/markosoft2000/bike-tracker/internal/storage"
 )
 
 func SetupRoutes(
-	cfg *config.Config,
+	ctx context.Context,
+	cfg *config.MiddlewareConfig,
 	log *slog.Logger,
 	router fiber.Router,
 	auth auth_handler.AuthHandlerService,
+	storage storage.AppPublicKeyStorage,
 ) {
 
 	router.Get("/health", func(c fiber.Ctx) error { return c.SendStatus(200) })
@@ -28,7 +32,7 @@ func SetupRoutes(
 	// 	})
 	// })
 
-	authGroup := router.Group("/api/v1", middleware.RateLimiter(&cfg.Middleware))
+	authGroup := router.Group("/api/v1", middleware.RateLimiter(cfg))
 	{
 		// Public Authentication Endpoints
 		authGroup.Post("/register", auth.Register)
@@ -36,7 +40,7 @@ func SetupRoutes(
 		authGroup.Post("/refresh", auth.Refresh)
 
 		// Protected Authentication Endpoints (Require valid Bearer token)
-		protectedAuth := authGroup.Use(middleware.AuthGuard(log))
+		protectedAuth := authGroup.Use(middleware.AuthGuard(ctx, log, cfg, storage))
 
 		protectedAuth.Post("/logout", auth.Logout)
 		protectedAuth.Get("/users/:userId/admin", auth.IsAdmin)

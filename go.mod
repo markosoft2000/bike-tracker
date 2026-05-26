@@ -9,6 +9,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/mailru/easyjson v0.9.2
+	github.com/redis/rueidis v1.0.53
 	google.golang.org/grpc v1.70.0
 	google.golang.org/protobuf v1.36.11
 )

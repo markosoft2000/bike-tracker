@@ -1,4 +1,16 @@
 services:
+  redis:
+    image: redis:7-alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   app:
     build: .
@@ -11,9 +23,15 @@ services:
     #       cpus: '2'    # Guaranteed 25% of a CPU core
     #       memory: 2048M   # Soft limit: Docker tries to keep usage here
     restart: always
+    depends_on:
+      redis:
+        condition: service_healthy
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:
       CONFIG_PATH: "./configs/local.yaml"
     ports:
       - "8080:8080"
+
+volumes:
+  redisdata:

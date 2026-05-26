@@ -12,6 +12,8 @@ http_server:
 middleware:
   rate_limit_max: 1000
   rate_limit_expiration: 60s
+  token_issuer: "markosoft2000"
+  token_audience: "auth-service"
 services:
   auth_service_addr: "host.docker.internal:50001"
   slo:
@@ -23,3 +25,7 @@ services:
         refresh_token_timeout: 2s
         app_add_timeout: 2s
         app_remove_timeout: 2s
+redis:
+  host: "redis"
+  port: 6379
+  operation_timeout: 2s

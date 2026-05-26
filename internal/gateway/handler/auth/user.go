@@ -66,6 +66,12 @@ func (h *authHandler) Logout(c fiber.Ctx) error {
 		)
 	}
 
+	req.UserId = c.Locals("userId").(string)
+
+	if !req.GetAllApp() {
+		req.AppId = c.Locals("appId").(string)
+	}
+
 	ctx, cancel := context.WithTimeout(
 		context.Background(),
 		h.cfg.Services.SLO.Auth.UserLogoutTimeout,
