@@ -12,11 +12,11 @@ const (
 	appPrefix = "app:"
 )
 
-func getAppKey(appId string) string {
-	return appPrefix + appId // TODO 0 alloc
+func getAppKey(appID string) string {
+	return appPrefix + appID // TODO 0 alloc
 }
 
-// App provides app public key
+// AppPublicKey provides app public key
 func (s *Storage) AppPublicKey(ctx context.Context, appID string) ([]byte, error) {
 	const op = "storage.redis.AppPublicKey"
 
@@ -44,9 +44,9 @@ func (s *Storage) AppPublicKey(ctx context.Context, appID string) ([]byte, error
 	return data, nil
 }
 
-// SaveApp saves app public key
+// SaveAppPublicKey saves app public key
 func (s *Storage) SaveAppPublicKey(ctx context.Context, appID string, pk []byte) error {
-	const op = "storage.redis.SaveApp"
+	const op = "storage.redis.SaveAppPublicKey"
 
 	ctxOp, OpCancel := context.WithTimeout(ctx, s.cfg.OperationTimeout)
 	defer OpCancel()
@@ -65,9 +65,9 @@ func (s *Storage) SaveAppPublicKey(ctx context.Context, appID string, pk []byte)
 	return nil
 }
 
-// DeleteApp deletes app public key
-func (s *Storage) DeleteApp(ctx context.Context, appID string) error {
-	const op = "storage.redis.DeleteApp"
+// DeleteAppPublicKey deletes app public key
+func (s *Storage) DeleteAppPublicKey(ctx context.Context, appID string) error {
+	const op = "storage.redis.DeleteAppPublicKey"
 
 	ctxOp, OpCancel := context.WithTimeout(ctx, s.cfg.OperationTimeout)
 	defer OpCancel()

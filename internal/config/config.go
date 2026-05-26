@@ -12,10 +12,12 @@ import (
 
 type Config struct {
 	Env        string           `yaml:"env" env:"ENV" env-default:"local"`
+	TokenTTL   time.Duration    `yaml:"token_ttl" env:"TOKEN_TTL" env-default:"15m"`
 	HTTPServer HTTPServerConfig `yaml:"http_server"`
 	Middleware MiddlewareConfig `yaml:"middleware"`
 	Services   ServicesConfig   `yaml:"services"`
 	Redis      RedisConfig      `yaml:"redis"`
+	Kafka      KafkaConfig      `yaml:"kafka"`
 }
 
 type HTTPServerConfig struct {
@@ -61,6 +63,17 @@ type RedisConfig struct {
 	Host             string        `yaml:"host" env:"REDIS_HOST" env-default:"localhost"`
 	Port             int           `yaml:"port" env:"REDIS_PORT" env-default:"6379"`
 	OperationTimeout time.Duration `yaml:"operation_timeout" env:"OPERATION_TIMEOUT" env-default:"5s"`
+}
+
+type KafkaConfig struct {
+	Brokers                     string `yaml:"brokers" env:"KAFKA_BROKERS" env-default:"localhost:9092"`
+	UserActivityGroupID         string `yaml:"user_activity_group_id" env:"KAFKA_USER_ACTIVITY_GROUP_ID" env-default:"gateway-act-group"`
+	UserActivityTopic           string `yaml:"user_activity_topic" env:"KAFKA_USER_ACTIVITY_TOPIC" env-default:"auth-user-activity-v1"`
+	UserActivityAutoOffsetReset string `yaml:"user_activity_auto_offset_reset" env:"KAFKA_USER_ACTIVITY_AUTO_OFFSET_RESET" env-default:"earliest"`
+
+	AppPublicKeyGroupID         string `yaml:"app_public_key_group_id" env:"KAFKA_APP_PUBLIC_KEY_GROUP_ID" env-default:"gateway-app-pk-group"`
+	AppPublicKeyTopic           string `yaml:"app_public_key_topic" env:"KAFKA_APP_PUBLIC_KEY_TOPIC" env-default:"auth-app-key-v1"`
+	AppPublicKeyAutoOffsetReset string `yaml:"app_public_key_auto_offset_reset" env:"KAFKA_APP_PUBLIC_KEY_AUTO_OFFSET_RESET" env-default:"earliest"`
 }
 
 var (

@@ -1,4 +1,5 @@
 env: "local"
+token_ttl: 15m
 http_server:
   address: "0.0.0.0:8080"
   server_header: "bike-tracker"
@@ -29,3 +30,11 @@ redis:
   host: "redis"
   port: 6379
   operation_timeout: 2s
+kafka:
+  brokers: "kafka:9092"
+  user_activity_group_id: "gateway-act-group"
+  user_activity_topic: "auth-user-activity-v1"
+  user_activity_auto_offset_reset: "latest"
+  app_public_key_group_id: "gateway-app-pk-group"
+  app_public_key_topic: "auth-app-key-v1"
+  app_public_key_auto_offset_reset: "earliest"  

@@ -13,6 +13,7 @@ type Config struct {
 	Port int
 
 	OperationTimeout time.Duration
+	TokenTTL         time.Duration
 }
 
 type Storage struct {

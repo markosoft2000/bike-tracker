@@ -13,6 +13,7 @@ import (
 	"github.com/markosoft2000/bike-tracker/internal/gateway/middleware"
 	"github.com/markosoft2000/bike-tracker/internal/gateway/router"
 	libjson "github.com/markosoft2000/bike-tracker/internal/lib/json"
+	"github.com/markosoft2000/bike-tracker/internal/pubsub/kafka"
 	"github.com/markosoft2000/bike-tracker/internal/storage"
 	"github.com/markosoft2000/bike-tracker/internal/storage/redis"
 )
@@ -64,20 +65,15 @@ func New(
 		Host:             cfg.Redis.Host,
 		Port:             cfg.Redis.Port,
 		OperationTimeout: cfg.Redis.OperationTimeout,
+		TokenTTL:         cfg.TokenTTL,
 	})
 	if err != nil {
 		log.Error("failed to init redis", slog.Any("error", err))
 		os.Exit(1)
 	}
 
-	// TODO update app-pk via kafka
-	redis.SaveAppPublicKey(
-		ctx,
-		"019dfd8c-a2ca-7d73-b3c7-80840b1fbed9",
-		[]byte(`-----BEGIN PUBLIC KEY-----
-MCowBQYDK2VwAyEAnxd77m/ARyaInhO0sCE5sQt3JNeWCSTCU2rtF7lj+X0=
------END PUBLIC KEY-----`),
-	)
+	go kafka.RunTokenBlackListConsumer(ctx, log, cfg.Kafka, redis)
+	go kafka.RunAppPublicKeyConsumer(ctx, log, cfg.Kafka, redis)
 
 	// ROUTER
 	router.SetupRoutes(ctx, &cfg.Middleware, log, srv, authHandler, redis)

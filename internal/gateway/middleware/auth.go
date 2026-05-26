@@ -43,7 +43,19 @@ func AuthGuard(
 		tokenStr := authHeader[7:]
 
 		token, claims, err := libjwt.ParseToken(tokenStr, getPK)
-		if err != nil || !token.Valid {
+		if err != nil {
+			log.Error("failed to parse token", slog.Any("error", err))
+
+			return c.
+				Status(fiber.StatusUnauthorized).
+				JSON(
+					fiber.Map{
+						"error": "Unauthorized: Failed to parse access token",
+					},
+				)
+		}
+
+		if !token.Valid {
 			log.Error("invalid token", slog.Any("token", tokenStr))
 
 			return c.
@@ -94,6 +106,8 @@ func validateToken(
 	if claims.UserID == uuid.Nil || claims.AppID == uuid.Nil || claims.Email == "" {
 		return errors.New("token is missing mandatory custom claims (sub, app_id, or email)")
 	}
+
+	// @TODO check if the token is on the blacklist
 
 	return nil
 }

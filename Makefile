@@ -41,10 +41,16 @@ gen-proto:
 # Use the service name defined in docker-compose.yaml
 DOCKER_APP_SERVICE = app
 
-.PHONY: docker-up docker-down docker-reload
+.PHONY: docker-up docker-down docker-reload generate
+
+generate:
+	@echo "Generating EasyJSON code..."
+	GOFLAGS="-mod=mod" go generate ./...
+	go mod tidy
+	go mod vendor
 
 # Start everything
-docker-up:
+docker-up: generate
 	docker compose up --build -d
 
 # Stop everything
@@ -52,5 +58,5 @@ docker-down:
 	docker compose down
 
 # Rebuild the app and restart it without touching the DB
-docker-reload:
+docker-reload: generate
 	docker compose up --build -d --no-deps --force-recreate app
