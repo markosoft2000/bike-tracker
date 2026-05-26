@@ -76,7 +76,7 @@ func New(
 	go kafka.RunAppPublicKeyConsumer(ctx, log, cfg.Kafka, redis)
 
 	// ROUTER
-	router.SetupRoutes(ctx, &cfg.Middleware, log, srv, authHandler, redis)
+	router.SetupRoutes(ctx, &cfg.Middleware, log, srv, authHandler, redis, redis)
 
 	return &App{
 		cfg: cfg,

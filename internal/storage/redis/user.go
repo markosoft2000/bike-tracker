@@ -32,7 +32,7 @@ func (s *Storage) UserLogoutStatus(
 
 	// Handle "Key Not Found" specifically
 	if rueidis.IsRedisNil(resp.Error()) {
-		return false, fmt.Errorf("%s: app not found: %w", op, storage.ErrUserLogoutStatusNotFound)
+		return false, fmt.Errorf("%s: user status not found: %w", op, storage.ErrUserLogoutStatusNotFound)
 	}
 
 	if err := resp.Error(); err != nil {

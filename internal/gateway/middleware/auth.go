@@ -21,14 +21,15 @@ func AuthGuard(
 	ctx context.Context,
 	log *slog.Logger,
 	cfg *config.MiddlewareConfig,
-	store storage.AppPublicKeyStorage,
+	appStore storage.AppPublicKeyStorage,
+	userStatusStore storage.UserLogoutStatusStorage,
 ) fiber.Handler {
 	const op = "gateway.middleware.AuthGuard"
 
 	log = log.With(slog.String("op", op))
 
 	getPK := func(appID string) ([]byte, error) {
-		return store.AppPublicKey(ctx, appID)
+		return appStore.AppPublicKey(ctx, appID)
 	}
 
 	return func(c fiber.Ctx) error {
@@ -79,6 +80,27 @@ func AuthGuard(
 				)
 		}
 
+		userLogoutStatus, err := userStatusStore.UserLogoutStatus(ctx, claims.UserID.String(), claims.AppID.String())
+		if err != nil && !errors.Is(err, storage.ErrUserLogoutStatusNotFound) {
+			return c.
+				Status(fiber.StatusUnauthorized).
+				JSON(
+					fiber.Map{
+						"error": fmt.Sprintf("Unauthorized: %v", err),
+					},
+				)
+		}
+
+		if userLogoutStatus {
+			return c.
+				Status(fiber.StatusUnauthorized).
+				JSON(
+					fiber.Map{
+						"error": "Unauthorized: User is logged out",
+					},
+				)
+		}
+
 		c.Locals("userId", claims.UserID)
 		c.Locals("appId", claims.AppID.String())
 
@@ -106,8 +128,6 @@ func validateToken(
 	if claims.UserID == uuid.Nil || claims.AppID == uuid.Nil || claims.Email == "" {
 		return errors.New("token is missing mandatory custom claims (sub, app_id, or email)")
 	}
-
-	// @TODO check if the token is on the blacklist
 
 	return nil
 }

@@ -18,7 +18,8 @@ func SetupRoutes(
 	log *slog.Logger,
 	router fiber.Router,
 	auth auth_handler.AuthHandlerService,
-	storage storage.AppPublicKeyStorage,
+	appStorage storage.AppPublicKeyStorage,
+	userStatusStore storage.UserLogoutStatusStorage,
 ) {
 
 	router.Get("/health", func(c fiber.Ctx) error { return c.SendStatus(200) })
@@ -40,7 +41,7 @@ func SetupRoutes(
 		authGroup.Post("/refresh", auth.Refresh)
 
 		// Protected Authentication Endpoints (Require valid Bearer token)
-		protectedAuth := authGroup.Use(middleware.AuthGuard(ctx, log, cfg, storage))
+		protectedAuth := authGroup.Use(middleware.AuthGuard(ctx, log, cfg, appStorage, userStatusStore))
 
 		protectedAuth.Post("/logout", auth.Logout)
 		protectedAuth.Get("/users/:userId/admin", auth.IsAdmin)
